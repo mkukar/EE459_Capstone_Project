@@ -1,10 +1,39 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <math.h>
+#include <stdlib.h>
+
+#define F_CPU 8000000L
 
 #define LED        PB1
 #define LED_PORT   PORTB
 #define THERM      PB0
 #define THERM_PORT PORTB
+
+class RHT03
+{
+private:
+    time_t  _lastReadTime;
+    PinName _data;
+    float   _lastHumidity;
+    float   _lastTemperature;
+public:
+    RHT03(PinName Data);
+    ~RHT03();
+    /** Reads data from the RHT03
+      * @return error type or successful read
+      */
+    RHT03_ERROR readData(void);
+    /** Gives current humidity value
+      * @return humidity value
+      */
+    float getHumidity();
+    /** Gives current temperature value
+      * @return temperature value
+      */
+    float getTemperatureC();
+    void clockReset();
+};
 
 void read_therm()
 {
@@ -15,6 +44,47 @@ void read_therm()
   DDRB &= ~(1<<THERM);
   THERM_PORT &= ~(1<<LED);
   
-  While(
+  While(i!=40)
+  {
+    _delay_us(22);
+    currentHumidity    = 0;
+    currentTemperature = 0;
+    checkSum           = 0;
+    // First 16 bits is Humidity
+    for (i=0; i<16; i++) {
+        //printf("bit %d: %d  ", i, bitTimes[i+1]);
+        if (bitTimes[i+1] > 0) {
+            currentHumidity |= ( 1 << (15-i));
+        }
+    }
+    
+    // Second 16 bits is Temperature 
+    for (i=16; i<32; i ++) {
+        //printf("bit %d: %d  ", i, bitTimes[i+1]);
+        if (bitTimes[i+1] > 0) {
+            currentTemperature |= (1 <<(31-i));
+        }
+    }
+ 
+    // Last 8 bit is Checksum
+    for (i=32; i<40; i++) {
+        //printf("bit %d: %d  ", i, bitTimes[i+1]);
+        if (bitTimes[i+1] > 0) {
+            checkSum |= (1 << (39-i));
+        }
+    }
+   
+    _lastHumidity = (float(currentHumidity) / 10.0);
+    
+    // if first bit of currentTemperature is 1, it is negative value.
+    if ((currentTemperature & 0x8000)==0x8000) {        
+        _lastTemperature = (float(currentTemperature & 0x7FFF) / 10.0) * -1.0;
+    } else {
+        _lastTemperature = float(currentTemperature) / 10.0;
+    }
+  }
+  
+}
+  
   
   
