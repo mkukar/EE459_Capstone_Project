@@ -130,6 +130,22 @@ else if ($icon == "clear-night") {
 }
 else if ($icon == "rain") {
     $weatherFile = "Climacons/SVG/Cloud-Drizzle.svg";
+    $toSendMessage = "skip";
+    // we also send the skip message on rain
+    if(! socket_sendto($sock, $toSendMessage , strlen($toSendMessage) , 0 , $server , $port))
+        {
+            $errorcode = socket_last_error();
+            $errormsg = socket_strerror($errorcode);
+         
+    }
+         
+        //Now receive reply from server (we don't use this right now)
+    if(socket_recv ( $sock , $reply , 2045 , MSG_WAITALL ) === FALSE)
+    {
+            $errorcode = socket_last_error();
+            $errormsg = socket_strerror($errorcode);
+         
+    }
 }
 else if ($icon == "snow") {
     $weatherFile = "Climacons/SVG/Cloud-Snow.svg";
