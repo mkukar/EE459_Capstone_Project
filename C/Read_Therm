@@ -7,7 +7,18 @@
 typedef uint8_t byte;
 
 double temp,humidity;
+unsigned char c_temp,c_humidity;
 int sensor_data[40];
+
+unsigned char gettemp(unsigned char get_temp)
+{
+	return get_temp;
+}
+
+unsigned char gethumidity(unsigned char get_humidity)
+{
+	return get_humidity;
+}
 
 void temperature_get()
 {
@@ -94,6 +105,9 @@ void temperature_get()
 
 	
 	temp = temporary_temp/10;
-	humidity = temporary_humidity/100;
+	humidity = temporary_humidity;
+	int i_temp = (int) temp;
+	int i_humidity = (int) humidity;
+	c_temp = (char) i_temp;
+	c_humidity = (char) c_humidity;
 }	
-
